@@ -403,3 +403,7 @@ git tag 1.3.0-rc.1 && git push origin 1.3.0-rc.1   # marked as pre-release
 linux/darwin/windows × amd64/arm64 and attaches to the GitHub release the bare
 binaries, `.tar.gz`/`.zip` archives and `checksums.txt`. The tag becomes the
 version reported by `kcctl --version`. Tags like `v1.2.0` are ignored.
+
+## License
+
+[MIT](LICENSE)
