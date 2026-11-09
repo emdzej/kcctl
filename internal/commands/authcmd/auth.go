@@ -42,7 +42,9 @@ Grants:
 
 The stock admin-cli client allows only password and client_credentials. For
 browser or device sign-in, create a public client (e.g. 'kcctl') in the auth
-realm once and point the context at it with --client-id.
+realm once and point the context at it with --client-id. Step-by-step setup
+and troubleshooting:
+https://github.com/emdzej/keycloak-cli#browser-sign-in-accounts-without-a-password
 
 Secrets are read from --password-file / --client-secret-file, piped stdin,
 or a hidden prompt; never from a flag value. KCCTL_PASSWORD and

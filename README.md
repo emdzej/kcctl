@@ -208,31 +208,70 @@ grant could use. Use `--grant browser`: kcctl opens the Keycloak login page
 in your browser, you sign in as usual, and Keycloak redirects back to a
 temporary listener on `127.0.0.1` (authorization code flow with PKCE).
 
-The stock `admin-cli` client doesn't allow browser sign-in, so create a
-client for kcctl once, in the realm your admin account belongs to (usually
-`master`). In the admin console: **Clients → Create client**
+The stock `admin-cli` client doesn't allow browser sign-in (its standard
+flow is off), so create a client for kcctl once. You only do this once per
+Keycloak, and you can do it in the admin console with your normal browser
+sign-in.
 
-| Setting | Value |
-|---|---|
-| Client ID | `kcctl` |
-| Client authentication | Off (public client) |
-| Authentication flow | Standard flow **on**; everything else off |
-| Valid redirect URIs | `http://127.0.0.1/*` |
+##### Create the client in the admin console
 
-Keycloak accepts any port on the loopback address for that redirect URI, so
-no port needs to be registered. Then:
+Pick the realm your **admin account** lives in (top-left realm selector,
+usually `master`), then **Clients → Create client** and fill in the three
+screens of the wizard:
+
+1. **General settings**
+   - Client type: `OpenID Connect`
+   - Client ID: `kcctl` (any name works; you pass it as `--client-id`)
+2. **Capability config**
+   - Client authentication: **Off** (a public client; a CLI can't keep a secret)
+   - Authentication flow: **Standard flow** on; untick *Direct access grants*
+     and the others, kcctl doesn't need them
+   - Require PKCE: **On** (kcctl always uses PKCE with S256)
+3. **Login settings**
+   - Valid redirect URIs: `http://127.0.0.1/*`
+   - leave Root URL, Home URL and Web origins empty
+
+Save. Keycloak treats loopback redirect URIs specially (RFC 8252): the
+registered `http://127.0.0.1/*` matches **any port**, which is what kcctl
+needs, because it listens on a random free port for each sign-in.
+
+Leave *Full scope allowed* (client **Client scopes** tab → `kcctl-dedicated`
+→ **Scope**) at its default **On**: kcctl's tokens must carry your admin
+roles, and with full scope off they won't.
+
+##### Point a context at it and sign in
 
 ```sh
 kcctl config set-context sso --server https://sso.example.com --grant browser --client-id kcctl
-kcctl auth login
+kcctl auth login          # opens the browser; sign in with your IdP as usual
+kcctl auth status         # state: signed in, grant: browser
 ```
 
-If you can already sign in some other way, kcctl can create the client:
+If your admin account lives in a realm other than `master` (a realm
+administrator rather than a server-wide one), create the client in that
+realm and add `--auth-realm <that-realm>` to `set-context`.
+
+##### Or create the client with kcctl
+
+If you can already sign in some other way (the bootstrap `admin` password,
+another context), kcctl can create the same client:
 
 ```sh
 kcctl -r master client create kcctl --public=true --standard-flow=true \
-  --direct-access=false --redirect-uri 'http://127.0.0.1/*'
+  --direct-access=false --redirect-uri 'http://127.0.0.1/*' \
+  --attr pkce.code.challenge.method=S256
 ```
+
+##### When it doesn't work
+
+| What you see | Cause | Fix |
+|---|---|---|
+| Browser: *Invalid parameter: redirect_uri* (kcctl keeps waiting) | the client has no `http://127.0.0.1/*` redirect URI (`localhost` doesn't match, kcctl redirects to `127.0.0.1`) | add exactly `http://127.0.0.1/*`, press Ctrl-C and log in again |
+| Browser: *Client not found* | wrong `--client-id`, or the client is in another realm than `--auth-realm` | check the client id and the realm |
+| `sign-in rejected: unauthorized_client: … Standard flow is disabled for the client.` | Standard flow is off on the client | turn on Standard flow |
+| `sign-in rejected (401): unauthorized_client: Invalid client or Invalid client credentials` | Client authentication is on (confidential client) | turn it off, or pass `--client-secret-file` |
+| signed in, but commands fail with 403 | your account lacks admin roles, or Full scope allowed is off | check `kcctl auth whoami`; give the user `admin` (master) or `realm-management` roles |
+| `sign-in was not completed within 5m0s` | the browser never came back to kcctl | see the first row; on a remote machine, see below |
 
 On a machine without a browser (SSH), add `--no-browser` and open the
 printed link on the same machine, or enable "OAuth 2.0 Device Authorization

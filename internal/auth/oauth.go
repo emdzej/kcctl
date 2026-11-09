@@ -110,11 +110,15 @@ func tokenError(status int, tr *tokenResponse) error {
 		code = errs.CodeServer
 	}
 	e := errs.New(code, "sign-in rejected (%d): %s", status, msg)
-	switch tr.Error {
-	case "unauthorized_client":
+	// Keycloak reports a missing or wrong client secret as unauthorized_client
+	// with "Invalid client credentials", not as invalid_client, so the
+	// description decides between the two hints.
+	badCredentials := tr.Error == "invalid_client" || strings.Contains(tr.ErrorDescription, "Invalid client credentials")
+	switch {
+	case badCredentials:
+		e.Hint = "The client is confidential (Client authentication is on): turn that off for a CLI client, or pass --client-secret-file."
+	case tr.Error == "unauthorized_client":
 		e.Hint = "The client does not allow this grant. Enable it on the client or pick another --grant."
-	case "invalid_client":
-		e.Hint = "The client id or secret is wrong, or the client is confidential and needs --client-secret-file."
 	}
 	return e
 }

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -91,5 +92,17 @@ func TestPasswordRejected(t *testing.T) {
 	_, err := c.Password(context.Background(), "admin", "wrong", "")
 	if e := errs.As(err); e.Code != errs.CodeAuth || e.Message != "sign-in rejected (401): invalid_grant: Invalid user credentials" {
 		t.Errorf("err = %q", e.Message)
+	}
+}
+
+func TestConfidentialClientHint(t *testing.T) {
+	// Keycloak's actual response for a confidential client without a secret.
+	e := errs.As(tokenError(401, &tokenResponse{Error: "unauthorized_client", ErrorDescription: "Invalid client or Invalid client credentials"}))
+	if !strings.Contains(e.Hint, "Client authentication is on") {
+		t.Errorf("hint = %q", e.Hint)
+	}
+	e = errs.As(tokenError(400, &tokenResponse{Error: "unauthorized_client", ErrorDescription: "Client not allowed for direct access grants"}))
+	if !strings.Contains(e.Hint, "does not allow this grant") {
+		t.Errorf("hint = %q", e.Hint)
 	}
 }
