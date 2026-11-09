@@ -1,0 +1,45 @@
+version: 2
+project_name: kcctl
+
+before:
+  hooks:
+    - go mod tidy
+    - go test ./...
+
+builds:
+  - id: kcctl
+    main: ./cmd/kcctl
+    binary: kcctl
+    env: [CGO_ENABLED=0]
+    flags: [-trimpath]
+    ldflags:
+      # Tags carry no "v" prefix, so .Version is the tag itself (e.g. 1.2.3).
+      - -s -w -X github.com/emdzej/keycloak-cli/internal/app.Version={{ .Version }}
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+
+archives:
+  # Archives bundle the README for package managers and manual installs.
+  - id: archive
+    formats: [tar.gz]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files: [README.md, LICENSE*]
+  # Bare binaries can be downloaded and run directly (curl -o kcctl ...).
+  - id: binary
+    formats: [binary]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: checksums.txt
+
+release:
+  # 1.2.0-rc.1 and similar are published as pre-releases.
+  prerelease: auto
+
+changelog:
+  use: github
+  filters:
+    exclude: ["^docs:", "^test:", "^chore:"]
