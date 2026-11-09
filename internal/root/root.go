@@ -12,7 +12,10 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/emdzej/kcctl/internal/app"
+	"github.com/emdzej/kcctl/internal/commands/extensioncmd"
+	"github.com/emdzej/kcctl/internal/config"
 	"github.com/emdzej/kcctl/internal/errs"
+	"github.com/emdzej/kcctl/internal/extension"
 	"github.com/emdzej/kcctl/internal/repl"
 )
 
@@ -24,7 +27,11 @@ var builders []Builder
 // Register is called from command packages' wiring in commands.go.
 func Register(b ...Builder) { builders = append(builders, b...) }
 
-func New(a *app.App) *cobra.Command {
+// New builds the tree for the target named on os.Args (or env, or config),
+// which decides the server whose discovered extensions are loaded.
+func New(a *app.App) *cobra.Command { return NewFor(a, os.Args[1:]) }
+
+func NewFor(a *app.App, args []string) *cobra.Command {
 	root := &cobra.Command{
 		Use:   "kcctl",
 		Short: "Command-line client for the Keycloak admin API",
@@ -62,19 +69,144 @@ Run 'kcctl interactive' for a prompt with live completion.`,
 		}
 		root.AddCommand(cmd)
 	}
+	loaded := &extensioncmd.Loaded{Shadowed: map[string][]string{}}
+	root.AddCommand(extensioncmd.New(a, loaded))
+	addExtensions(a, root, args, loaded)
 	return root
+}
+
+// addExtensions registers manifest commands and plugins after the built-ins,
+// which always win a name clash: an extension must never be able to change
+// what an existing command does.
+func addExtensions(a *app.App, root *cobra.Command, args []string, l *extensioncmd.Loaded) {
+	l.Manifests, l.Problems = extension.Load(targetServer(root, args))
+	l.Plugins = extension.Plugins()
+	if len(l.Manifests) == 0 && len(l.Plugins) == 0 {
+		return
+	}
+	root.AddGroup(&cobra.Group{ID: extensioncmd.GroupID, Title: "Extensions:"})
+	for _, m := range l.Manifests {
+		for _, cmd := range extensioncmd.Build(a, m) {
+			if taken(root, cmd) {
+				l.Shadowed[m.Name] = append(l.Shadowed[m.Name], cmd.Name())
+				continue
+			}
+			root.AddCommand(cmd)
+		}
+	}
+	for _, p := range l.Plugins {
+		cmd := extensioncmd.PluginCmd(a, p)
+		if taken(root, cmd) {
+			l.Shadowed["plugin:"+p.Name] = []string{p.Name}
+			continue
+		}
+		root.AddCommand(cmd)
+	}
+}
+
+func taken(root *cobra.Command, cmd *cobra.Command) bool {
+	names := append([]string{cmd.Name()}, cmd.Aliases...)
+	for _, c := range root.Commands() {
+		for _, n := range names {
+			if c.Name() == n || c.HasAlias(n) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// targetServer resolves the server before flags are parsed, from the
+// --context/--server given ahead of the command, then env and config.
+func targetServer(root *cobra.Command, args []string) string {
+	vals, _ := scanGlobals(root, args)
+	cfg, err := config.Load()
+	if err != nil {
+		return ""
+	}
+	r, _ := config.Resolve(cfg, config.Overrides{Context: vals["context"], Server: vals["server"]}, config.EnvOverrides())
+	if r == nil {
+		return ""
+	}
+	return r.Server
+}
+
+// scanGlobals reads root flags up to the first positional and returns their
+// values and the positional's index (-1 if none, or an unknown flag first).
+func scanGlobals(root *cobra.Command, args []string) (map[string]string, int) {
+	vals := map[string]string{}
+	fs := root.PersistentFlags()
+	for i := 0; i < len(args); i++ {
+		arg := args[i]
+		if arg == "--" {
+			return vals, -1
+		}
+		if !strings.HasPrefix(arg, "-") || arg == "-" {
+			return vals, i
+		}
+		name, val, hasVal := strings.Cut(strings.TrimLeft(arg, "-"), "=")
+		f := fs.Lookup(name)
+		if f == nil && !strings.HasPrefix(arg, "--") && len(name) > 0 {
+			f = fs.ShorthandLookup(name[:1])
+			if f != nil && len(name) > 1 && f.NoOptDefVal == "" {
+				val, hasVal = name[1:], true // -rmaster
+			}
+		}
+		if f == nil {
+			return vals, -1
+		}
+		if !hasVal && f.NoOptDefVal == "" {
+			if i+1 >= len(args) {
+				return vals, -1
+			}
+			i++
+			val = args[i]
+		}
+		vals[f.Name] = val
+	}
+	return vals, -1
+}
+
+// runPlugin handles `kcctl [global flags] <plugin> [plugin args]` before
+// cobra, so the plugin's own flags reach it untouched. It reports false when
+// the line isn't a plugin call.
+func runPlugin(a *app.App, root *cobra.Command, args []string) (bool, error) {
+	_, i := scanGlobals(root, args)
+	if i < 0 {
+		return false, nil
+	}
+	for _, c := range root.Commands() {
+		if c.Name() != args[i] || c.Annotations["plugin"] == "" {
+			continue
+		}
+		if err := root.PersistentFlags().Parse(args[:i]); err != nil {
+			return true, errs.Usage("%v", err)
+		}
+		if err := a.Init(); err != nil {
+			return true, err
+		}
+		return true, extensioncmd.RunPlugin(a, extension.Plugin{Name: c.Name(), Path: c.Annotations["plugin"]}, args[i+1:])
+	}
+	return false, nil
 }
 
 // Main runs the CLI and returns the process exit code.
 func Main(args []string) int {
 	a := app.New()
-	root := New(a)
-	root.SetArgs(args)
+	root := NewFor(a, args)
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
-	err := root.ExecuteContext(ctx)
+	handled, err := runPlugin(a, root, args)
+	if !handled {
+		root.SetArgs(args)
+		err = root.ExecuteContext(ctx)
+	}
 	if err == nil {
 		return 0
+	}
+	var pe *extensioncmd.ExitError
+	if errors.As(err, &pe) {
+		return pe.Code
 	}
 	e := errs.As(err)
 	// Cobra's own parse errors ("unknown command") arrive untyped.

@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/emdzej/kcctl/internal/app"
+	"github.com/emdzej/kcctl/internal/commands/extensioncmd"
 	"github.com/emdzej/kcctl/internal/compat"
 	"github.com/emdzej/kcctl/internal/output"
 )
@@ -32,6 +33,11 @@ func info(a *app.App) *cobra.Command {
 			p, err := c.Profile(cmd.Context(), refresh)
 			if err != nil {
 				return err
+			}
+			if refresh {
+				// The provider list just changed in the cache; keep the
+				// discovered extensions in step with it.
+				extensioncmd.AutoDiscover(cmd.Context(), a)
 			}
 			caps := map[string]any{}
 			for k, v := range p.Capabilities() {

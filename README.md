@@ -398,8 +398,32 @@ carry a credential are never written to disk.
 | `server` | `info`, `features`, `serverinfo` |
 | `api` | call any endpoint: `kcctl api GET users -Q search=al`, `kcctl api POST groups -d @g.yaml` |
 | `token` | print a valid access token: `curl -H "$(kcctl token --header)" …` |
+| `extension` | `list`, `discover`, `install`, `remove`, `show`: commands added by SPIs ([Extensions](#extensions)) |
 
 Every command has `--help` with examples.
+
+## Extensions
+
+If your Keycloak runs SPIs that add admin endpoints, such as
+[keycloak-api-keys](https://github.com/emdzej/keycloak-api-keys), kcctl can add
+commands for them. An SPI describes its commands in a manifest it serves itself,
+and kcctl picks the manifest up when you sign in:
+
+```sh
+kcctl auth login                  # discovers extensions on the server
+kcctl extension list
+kcctl api-key create alice --name ci --client my-api
+```
+
+These commands work like the built-in ones: names instead of UUIDs,
+completion, `-o json`, and secrets read only from files or prompts. A manifest
+is data, not code, and can only call the same server's admin API.
+
+You can also install a manifest by hand (`kcctl extension install file.yaml`).
+Any `kcctl-<name>` executable on `PATH` runs as `kcctl <name>`.
+
+[docs/extensions.md](docs/extensions.md) explains how this works, how to add
+kcctl support to your SPI, and the manifest format.
 
 ## Keycloak versions
 

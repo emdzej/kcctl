@@ -12,6 +12,7 @@ import (
 
 	"github.com/emdzej/kcctl/internal/app"
 	"github.com/emdzej/kcctl/internal/auth"
+	"github.com/emdzej/kcctl/internal/commands/extensioncmd"
 	"github.com/emdzej/kcctl/internal/config"
 	"github.com/emdzej/kcctl/internal/errs"
 )
@@ -181,6 +182,7 @@ KCCTL_CLIENT_SECRET are honoured for unattended runs.`,
 				who = "service account of " + r.ClientID
 			}
 			a.Printer.Success("Signed in to %s (realm %s) as %s.", r.Server, r.AuthRealm, who)
+			extensioncmd.AutoDiscover(cmd.Context(), a)
 			return nil
 		},
 	}

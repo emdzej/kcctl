@@ -12,18 +12,20 @@ cmd/kcctl              main: calls root.Main
 internal/errs          error taxonomy -> exit codes (no deps)
 internal/config        contexts file, XDG paths, flag > env > context resolution
 internal/httpx         shared HTTP client + -v/-vv tracing with secret masking
-internal/auth          token grants (password, client_credentials, device), store, refresh
+internal/auth          token grants (password, client_credentials, device, browser), store, refresh
 internal/kc            untyped admin API client, error mapping, serverinfo/profile cache
 internal/compat        version parsing + capability table (the ONLY place versions live)
 internal/output        table/vtable/json/yaml/jsonpath/custom-columns, colors, error report
 internal/app           CLI runtime: globals, App, Resource CRUD factory, lookups, input, completion
 internal/apptest       stub-server test harness
-internal/commands/*    one package per resource group, each exports New(a *app.App) *cobra.Command
+internal/extension     extension manifests (format, validation, store, discovery) and PATH plugins
+internal/commands/*    one package per resource group, each exports New(a *app.App) *cobra.Command;
+                       extensioncmd builds commands from manifests and runs plugins
 internal/repl          `kcctl interactive`
 internal/root          assembles the tree (commands.go lists every group)
 ```
 
-`internal/{errs,config,httpx,auth,kc,compat,output}` must not import cobra.
+`internal/{errs,config,httpx,auth,kc,compat,output,extension}` must not import cobra.
 
 ## Rules
 
@@ -69,6 +71,14 @@ internal/root          assembles the tree (commands.go lists every group)
   optional filters need no gating.
 - **Paths**: build with `c.RealmPath("seg", id, ...)` which escapes each
   segment. Paths in `apptest` replies are the escaped form.
+- **Extensions** (`docs/extensions.md`): the manifest format (`kcctl/v1`) is a
+  wire format that SPIs ship. Add keys, never rename or change their meaning.
+  Every manifest rule lives in `extension.Validate`. A discovered manifest
+  comes from a server, so paths stay restricted to that server's `/admin/`
+  API. Built-in commands always win name clashes (`root.addExtensions`). New
+  lookup/completer kinds go in `extension.Lookups`/`Completers` and
+  `extensioncmd.resolve`/`completion` together.
+  `docs/examples/api-keys.yaml` is exercised by the tests.
 - **Comments** say why, not what. No decorative emoji.
 
 ## Tests

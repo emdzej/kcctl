@@ -123,6 +123,23 @@ type Profile struct {
 	// Features maps feature flag name to enabled. Nil means the caller could
 	// not read features (non-master admins), so flag checks are optimistic.
 	Features map[string]bool
+	// Providers maps an SPI name to its installed provider ids, as listed by
+	// /admin/serverinfo. Nil means unknown (an older cache entry).
+	Providers map[string][]string
+}
+
+// HasProvider reports whether spi/id is installed. known is false when the
+// profile has no provider list, so callers can stay optimistic.
+func (p *Profile) HasProvider(spi, id string) (has, known bool) {
+	if p.Providers == nil {
+		return false, false
+	}
+	for _, x := range p.Providers[spi] {
+		if x == id {
+			return true, true
+		}
+	}
+	return false, true
 }
 
 func (p *Profile) Has(c Capability) bool {
