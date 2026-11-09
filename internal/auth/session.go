@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/emdzej/keycloak-cli/internal/config"
-	"github.com/emdzej/keycloak-cli/internal/errs"
+	"github.com/emdzej/kcctl/internal/config"
+	"github.com/emdzej/kcctl/internal/errs"
 )
 
 // refreshSkew renews slightly early so a token never expires mid-request.

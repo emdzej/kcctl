@@ -15,7 +15,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/emdzej/keycloak-cli/internal/errs"
+	"github.com/emdzej/kcctl/internal/errs"
 )
 
 type TokenSource interface {

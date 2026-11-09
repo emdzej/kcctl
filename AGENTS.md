@@ -87,5 +87,5 @@ linux/darwin/windows on amd64/arm64. Releases: pushing a tag without a `v`
 prefix (`1.2.3`, `1.2.3-rc.1`) runs `.github/workflows/release.yml`, where
 goreleaser attaches bare binaries, archives and checksums to the GitHub
 release. The tag is stamped into
-`github.com/emdzej/keycloak-cli/internal/app.Version`; `v`-prefixed tags
+`github.com/emdzej/kcctl/internal/app.Version`; `v`-prefixed tags
 don't trigger a release.

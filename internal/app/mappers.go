@@ -6,9 +6,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/emdzej/keycloak-cli/internal/errs"
-	"github.com/emdzej/keycloak-cli/internal/kc"
-	"github.com/emdzej/keycloak-cli/internal/output"
+	"github.com/emdzej/kcctl/internal/errs"
+	"github.com/emdzej/kcctl/internal/kc"
+	"github.com/emdzej/kcctl/internal/output"
 )
 
 var mapperColumns = []output.Column{

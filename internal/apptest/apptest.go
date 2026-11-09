@@ -17,9 +17,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/emdzej/keycloak-cli/internal/app"
-	"github.com/emdzej/keycloak-cli/internal/auth"
-	"github.com/emdzej/keycloak-cli/internal/errs"
+	"github.com/emdzej/kcctl/internal/app"
+	"github.com/emdzej/kcctl/internal/auth"
+	"github.com/emdzej/kcctl/internal/errs"
 )
 
 // Reply is a canned response. Body is JSON-encoded unless it is a string.

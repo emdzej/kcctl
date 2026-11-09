@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/emdzej/keycloak-cli/internal/root"
+	"github.com/emdzej/kcctl/internal/root"
 )
 
 func main() {

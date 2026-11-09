@@ -9,7 +9,7 @@ import (
 	"github.com/mattn/go-runewidth"
 	"github.com/spf13/cobra"
 
-	"github.com/emdzej/keycloak-cli/internal/output"
+	"github.com/emdzej/kcctl/internal/output"
 )
 
 const (

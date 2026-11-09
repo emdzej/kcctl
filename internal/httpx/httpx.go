@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/emdzej/keycloak-cli/internal/errs"
+	"github.com/emdzej/kcctl/internal/errs"
 )
 
 // Verbosity is process-wide: 1 = one line per request, 2 = headers + bodies.

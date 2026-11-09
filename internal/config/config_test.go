@@ -3,7 +3,7 @@ package config
 import (
 	"testing"
 
-	"github.com/emdzej/keycloak-cli/internal/errs"
+	"github.com/emdzej/kcctl/internal/errs"
 )
 
 func TestResolvePrecedence(t *testing.T) {

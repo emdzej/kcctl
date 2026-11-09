@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/emdzej/keycloak-cli/internal/config"
-	"github.com/emdzej/keycloak-cli/internal/errs"
+	"github.com/emdzej/kcctl/internal/config"
+	"github.com/emdzej/kcctl/internal/errs"
 )
 
 type mem map[string]*Session

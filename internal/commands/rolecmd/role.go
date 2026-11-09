@@ -9,10 +9,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/emdzej/keycloak-cli/internal/app"
-	"github.com/emdzej/keycloak-cli/internal/errs"
-	"github.com/emdzej/keycloak-cli/internal/kc"
-	"github.com/emdzej/keycloak-cli/internal/output"
+	"github.com/emdzej/kcctl/internal/app"
+	"github.com/emdzej/kcctl/internal/errs"
+	"github.com/emdzej/kcctl/internal/kc"
+	"github.com/emdzej/kcctl/internal/output"
 )
 
 var roleLookup = app.Lookup{What: "role", Path: app.RealmPath("roles"), NameField: "name"}

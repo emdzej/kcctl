@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/emdzej/keycloak-cli/internal/compat"
-	"github.com/emdzej/keycloak-cli/internal/config"
-	"github.com/emdzej/keycloak-cli/internal/errs"
+	"github.com/emdzej/kcctl/internal/compat"
+	"github.com/emdzej/kcctl/internal/config"
+	"github.com/emdzej/kcctl/internal/errs"
 )
 
 // profileTTL bounds how long a cached version is trusted; upgrades are rare

@@ -39,20 +39,20 @@ Keycloak already ships an admin CLI, `kcadm.sh`. kcctl exists because:
 
 ## Install
 
-Download from the [releases page](https://github.com/emdzej/keycloak-cli/releases)
+Download from the [releases page](https://github.com/emdzej/kcctl/releases)
 either the bare binary (`kcctl_<version>_<os>_<arch>`, `.exe` on Windows) or
 the archive with the README, verify it against `checksums.txt`, and put it on
 your `PATH`:
 
 ```sh
-curl -fsSLo kcctl https://github.com/emdzej/keycloak-cli/releases/download/0.1.0/kcctl_0.1.0_linux_amd64
+curl -fsSLo kcctl https://github.com/emdzej/kcctl/releases/download/0.1.0/kcctl_0.1.0_linux_amd64
 chmod +x kcctl && sudo mv kcctl /usr/local/bin/
 ```
 
 Or build from source (Go 1.27+):
 
 ```sh
-go install github.com/emdzej/keycloak-cli/cmd/kcctl@latest
+go install github.com/emdzej/kcctl/cmd/kcctl@latest
 # or
 make build        # -> bin/kcctl
 make dist         # -> dist/kcctl_<os>_<arch> for all six platforms

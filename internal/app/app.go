@@ -13,13 +13,13 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 
-	"github.com/emdzej/keycloak-cli/internal/auth"
-	"github.com/emdzej/keycloak-cli/internal/compat"
-	"github.com/emdzej/keycloak-cli/internal/config"
-	"github.com/emdzej/keycloak-cli/internal/errs"
-	"github.com/emdzej/keycloak-cli/internal/httpx"
-	"github.com/emdzej/keycloak-cli/internal/kc"
-	"github.com/emdzej/keycloak-cli/internal/output"
+	"github.com/emdzej/kcctl/internal/auth"
+	"github.com/emdzej/kcctl/internal/compat"
+	"github.com/emdzej/kcctl/internal/config"
+	"github.com/emdzej/kcctl/internal/errs"
+	"github.com/emdzej/kcctl/internal/httpx"
+	"github.com/emdzej/kcctl/internal/kc"
+	"github.com/emdzej/kcctl/internal/output"
 )
 
 // Version is stamped by the release build.

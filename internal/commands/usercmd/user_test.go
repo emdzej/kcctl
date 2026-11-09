@@ -6,8 +6,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/emdzej/keycloak-cli/internal/app"
-	"github.com/emdzej/keycloak-cli/internal/apptest"
+	"github.com/emdzej/kcctl/internal/app"
+	"github.com/emdzej/kcctl/internal/apptest"
 )
 
 var build = []func(*app.App) *cobra.Command{New}

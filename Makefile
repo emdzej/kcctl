@@ -1,5 +1,5 @@
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo 0.0.0-dev)
-LDFLAGS := -s -w -X github.com/emdzej/keycloak-cli/internal/app.Version=$(VERSION)
+LDFLAGS := -s -w -X github.com/emdzej/kcctl/internal/app.Version=$(VERSION)
 PLATFORMS := linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 windows/arm64
 
 .PHONY: build install test lint dist snapshot clean

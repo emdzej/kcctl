@@ -12,7 +12,7 @@ import (
 
 	"sigs.k8s.io/yaml"
 
-	"github.com/emdzej/keycloak-cli/internal/errs"
+	"github.com/emdzej/kcctl/internal/errs"
 )
 
 // Grant is how a context obtains tokens.

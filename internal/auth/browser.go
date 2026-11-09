@@ -14,8 +14,8 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/emdzej/keycloak-cli/internal/config"
-	"github.com/emdzej/keycloak-cli/internal/errs"
+	"github.com/emdzej/kcctl/internal/config"
+	"github.com/emdzej/kcctl/internal/errs"
 )
 
 // BrowserTimeout bounds how long sign-in may take in the browser.

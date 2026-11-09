@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/emdzej/keycloak-cli/internal/errs"
+	"github.com/emdzej/kcctl/internal/errs"
 )
 
 func printer(format string) (*Printer, *bytes.Buffer, *bytes.Buffer) {

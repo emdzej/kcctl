@@ -17,11 +17,11 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
-	"github.com/emdzej/keycloak-cli/internal/app"
-	"github.com/emdzej/keycloak-cli/internal/config"
-	"github.com/emdzej/keycloak-cli/internal/errs"
-	"github.com/emdzej/keycloak-cli/internal/kc"
-	"github.com/emdzej/keycloak-cli/internal/output"
+	"github.com/emdzej/kcctl/internal/app"
+	"github.com/emdzej/kcctl/internal/config"
+	"github.com/emdzej/kcctl/internal/errs"
+	"github.com/emdzej/kcctl/internal/kc"
+	"github.com/emdzej/kcctl/internal/output"
 )
 
 const greeting = `kcctl interactive mode. Suggestions follow what you type: Tab or → accepts, ↑/↓ choose, Esc hides them.

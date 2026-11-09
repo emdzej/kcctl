@@ -10,7 +10,7 @@ import (
 
 	"github.com/zalando/go-keyring"
 
-	"github.com/emdzej/keycloak-cli/internal/config"
+	"github.com/emdzej/kcctl/internal/config"
 )
 
 const keyringService = "kcctl"

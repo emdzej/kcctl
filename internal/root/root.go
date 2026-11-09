@@ -11,9 +11,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/emdzej/keycloak-cli/internal/app"
-	"github.com/emdzej/keycloak-cli/internal/errs"
-	"github.com/emdzej/keycloak-cli/internal/repl"
+	"github.com/emdzej/kcctl/internal/app"
+	"github.com/emdzej/kcctl/internal/errs"
+	"github.com/emdzej/kcctl/internal/repl"
 )
 
 // Builder adds one top-level command (or group) to the tree.

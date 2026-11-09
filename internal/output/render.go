@@ -13,7 +13,7 @@ import (
 	"github.com/ohler55/ojg/jp"
 	"sigs.k8s.io/yaml"
 
-	"github.com/emdzej/keycloak-cli/internal/errs"
+	"github.com/emdzej/kcctl/internal/errs"
 )
 
 // Column is one table column; Path is a JSONPath relative to the row

@@ -1,4 +1,4 @@
-module github.com/emdzej/keycloak-cli
+module github.com/emdzej/kcctl
 
 go 1.27.1
 

@@ -14,7 +14,7 @@ import (
 	"golang.org/x/term"
 	"sigs.k8s.io/yaml"
 
-	"github.com/emdzej/keycloak-cli/internal/errs"
+	"github.com/emdzej/kcctl/internal/errs"
 )
 
 // BodyFlags are the -f/--set pair every create/update command takes.

@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/emdzej/keycloak-cli/internal/config"
+	"github.com/emdzej/kcctl/internal/config"
 )
 
 const historyLimit = 1000
