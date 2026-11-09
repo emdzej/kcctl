@@ -45,7 +45,7 @@ the archive with the README, verify it against `checksums.txt`, and put it on
 your `PATH`:
 
 ```sh
-curl -fsSLo kcctl https://github.com/emdzej/keycloak-cli/releases/download/1.0.0/kcctl_1.0.0_linux_amd64
+curl -fsSLo kcctl https://github.com/emdzej/keycloak-cli/releases/download/0.1.0/kcctl_0.1.0_linux_amd64
 chmod +x kcctl && sudo mv kcctl /usr/local/bin/
 ```
 
