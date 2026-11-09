@@ -2,6 +2,7 @@ package extension
 
 import (
 	"os"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -83,10 +84,15 @@ func TestInstallLoadRemove(t *testing.T) {
 }
 
 func TestPluginName(t *testing.T) {
-	if n, ok := pluginName("kcctl-foo"); !ok || n != "foo" {
+	// Windows only runs files with an executable extension.
+	ext := ""
+	if runtime.GOOS == "windows" {
+		ext = ".exe"
+	}
+	if n, ok := pluginName("kcctl-foo" + ext); !ok || n != "foo" {
 		t.Fatal(n, ok)
 	}
-	if _, ok := pluginName("kcctl-Foo_bar"); ok {
+	if _, ok := pluginName("kcctl-Foo_bar" + ext); ok {
 		t.Fatal("accepted bad name")
 	}
 	if _, ok := pluginName("kubectl-foo"); ok {
