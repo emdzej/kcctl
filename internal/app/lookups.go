@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"encoding/json"
 	"net/url"
 	"strings"
 
@@ -112,9 +113,22 @@ func FindGroup(ctx context.Context, c *kc.Client, ref string) (string, error) {
 }
 
 // GroupCompleter offers group paths, which are unique, with the id beside.
+// Keycloak 26 lists only top-level groups (subgroups are loaded lazily), so a
+// path prefix like "/staff/" lists the children of /staff instead.
 func (a *App) GroupCompleter() cobra.CompletionFunc {
 	return a.Fetched("groups", func(ctx context.Context, c *kc.Client, _ []string, tc string) ([]Item, error) {
-		v, err := c.Get(ctx, c.RealmPath("groups"), Groups.Search(tc))
+		var v any
+		var err error
+		if i := strings.LastIndex(tc, "/"); i > 0 {
+			parent, perr := FindGroup(ctx, c, tc[:i])
+			if perr != nil {
+				return nil, perr
+			}
+			v, err = c.Get(ctx, c.RealmPath("groups", parent, "children"),
+				url.Values{"max": {"100"}, "briefRepresentation": {"true"}})
+		} else {
+			v, err = c.Get(ctx, c.RealmPath("groups"), Groups.Search(strings.TrimPrefix(tc, "/")))
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -126,7 +140,18 @@ func (a *App) GroupCompleter() cobra.CompletionFunc {
 				m, _ := g.(map[string]any)
 				p, _ := m["path"].(string)
 				id, _ := m["id"].(string)
-				items = append(items, Item{Value: p, Desc: id})
+				value, desc := p, id
+				// A bare name typed without "/" completes as a name, which
+				// FindGroup accepts when it is unique.
+				if !strings.HasPrefix(tc, "/") {
+					name, _ := m["name"].(string)
+					value, desc = name, p+" · "+id
+				}
+				// Say there is more below, so the user knows to keep typing.
+				if n, ok := m["subGroupCount"].(json.Number); ok && n.String() != "0" {
+					desc = n.String() + " subgroups · " + desc
+				}
+				items = append(items, Item{Value: value, Desc: desc})
 				walk(m["subGroups"])
 			}
 		}

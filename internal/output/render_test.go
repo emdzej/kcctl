@@ -87,3 +87,11 @@ func TestObjectView(t *testing.T) {
 		t.Errorf("object view:\n%s", s)
 	}
 }
+
+func TestObjectViewSkipsEmptyContainers(t *testing.T) {
+	p, out, _ := printer("")
+	_ = p.Print(map[string]any{"name": "staff", "attributes": map[string]any{}, "subGroups": []any{}}, nil)
+	if s := out.String(); strings.Contains(s, "attributes") || strings.Contains(s, "subGroups") {
+		t.Errorf("empty containers shown:\n%s", s)
+	}
+}

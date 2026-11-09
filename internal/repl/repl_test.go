@@ -2,9 +2,13 @@ package repl
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
+
+	"github.com/emdzej/keycloak-cli/internal/output"
 )
 
 func TestSplit(t *testing.T) {
@@ -99,5 +103,17 @@ func TestSensitiveLinesStayOffDisk(t *testing.T) {
 	}
 	if got := LoadHistory().Entries(); !reflect.DeepEqual(got, []string{"user list"}) {
 		t.Errorf("on disk = %v", got)
+	}
+}
+
+// While editing, a mistyped command is marked and explained even when there
+// are no suggestions to show.
+func TestViewExplainsUnknownCommand(t *testing.T) {
+	m := newPrompt(tree(), func([]string, string) Completion { return Completion{} }, &History{}, output.NewStyle(false), nil)
+	for _, r := range "usr list" {
+		m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{r}})
+	}
+	if v := m.View(); !strings.Contains(v, "unknown command 'usr' for 'kcctl'") {
+		t.Errorf("view:\n%s", v)
 	}
 }

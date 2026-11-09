@@ -320,6 +320,11 @@ func (p *Printer) object(v any, columns []Column, depth int) {
 	indent := strings.Repeat("  ", depth)
 	var scalars, nested []string
 	for _, k := range sortedKeys(m) {
+		// Empty maps and lists ("attributes", "subGroups") are noise in a
+		// human view; -o json/yaml still shows them.
+		if isEmptyContainer(m[k]) {
+			continue
+		}
 		if isScalarish(m[k]) {
 			scalars = append(scalars, k)
 		} else {
@@ -370,6 +375,16 @@ func (p *Printer) object(v any, columns []Column, depth int) {
 			}
 		}
 	}
+}
+
+func isEmptyContainer(v any) bool {
+	switch t := v.(type) {
+	case map[string]any:
+		return len(t) == 0
+	case []any:
+		return len(t) == 0
+	}
+	return false
 }
 
 func isEmpty(v any) bool {

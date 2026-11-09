@@ -21,8 +21,11 @@ const (
 
 type outcome int
 
+// outcomeEditing is the zero value on purpose: until Enter or Ctrl-D the
+// line is still being edited, and View must keep drawing hints for it.
 const (
-	outcomeRun outcome = iota
+	outcomeEditing outcome = iota
+	outcomeRun
 	outcomeExit
 )
 
@@ -491,7 +494,7 @@ func (m *promptModel) View() string {
 	}
 
 	b.WriteString(m.renderLine())
-	if m.outcome == outcomeRun && m.comp.Items == nil {
+	if m.outcome == outcomeRun {
 		return b.String() + "\n"
 	}
 	b.WriteString("\n")

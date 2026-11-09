@@ -344,6 +344,8 @@ refuse unless you pass `--yes`. Deleting one named resource does not ask.
 
 ## Interactive mode
 
+![kcctl interactive mode: commands, users, roles and group paths completing as you type](docs/interactive.gif)
+
 ```sh
 kcctl interactive                    # or: kcctl i
 kcctl interactive --context prod -r acme

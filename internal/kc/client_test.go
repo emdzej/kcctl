@@ -61,3 +61,10 @@ func TestCreatedID(t *testing.T) {
 		t.Errorf("got %q", r.CreatedID())
 	}
 }
+
+func TestMultipleFieldErrorsAreSeparated(t *testing.T) {
+	body := `{"field":"email","errorMessage":"error-invalid-email","params":[],"errors":[{"field":"email","errorMessage":"error-invalid-email"},{"field":"username","errorMessage":"error-username-invalid-character"}]}`
+	if got := serverMessage([]byte(body)); got != "field email: error-invalid-email; field username: error-username-invalid-character" {
+		t.Errorf("got %q", got)
+	}
+}

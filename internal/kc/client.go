@@ -256,26 +256,31 @@ func serverMessage(body []byte) string {
 		}
 		return s
 	}
-	var parts []string
-	if f, ok := m["field"].(string); ok && f != "" {
-		parts = append(parts, "field "+f+":")
-	}
+	var msg string
 	for _, k := range []string{"errorMessage", "error_description", "error"} {
 		if s, ok := m[k].(string); ok && s != "" {
-			parts = append(parts, s)
+			msg = s
 			break
 		}
+	}
+	if f, ok := m["field"].(string); ok && f != "" {
+		msg = "field " + f + ": " + msg
+	}
+	// User-profile validation returns one entry per failing field.
+	parts := []string{}
+	if msg != "" {
+		parts = append(parts, msg)
 	}
 	if errsList, ok := m["errors"].([]any); ok {
 		for _, x := range errsList {
 			if em, ok := x.(map[string]any); ok {
-				if s := serverMessage(mustJSON(em)); s != "" {
+				if s := serverMessage(mustJSON(em)); s != "" && s != msg {
 					parts = append(parts, s)
 				}
 			}
 		}
 	}
-	return strings.Join(parts, " ")
+	return strings.Join(parts, "; ")
 }
 
 func mustJSON(v any) []byte {
